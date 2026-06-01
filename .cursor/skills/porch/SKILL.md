@@ -22,6 +22,7 @@ Service repos own app code, app build/test commands, runtime environment variabl
 - Do not publish host ports from app containers. Caddy is the only public edge on ports 80 and 443.
 - Keep `container_name` stable and ensure it matches the Porch service registration.
 - Do not configure a separate host reverse proxy per app. Shared Caddy routing is managed by Porch.
+- Do not add custom reboot startup scripts for normal services. Porch relies on Docker being enabled at boot and containers using `restart: unless-stopped`.
 - Never commit SSH keys, DigitalOcean tokens, `.env` secrets, or provider credentials.
 
 ## New App Workflow
@@ -115,6 +116,12 @@ Check host health with:
 ```bash
 npx @lindale/porch host doctor --json
 ```
+
+On systemd hosts, `host init` enables and starts Docker. `host doctor` reports whether Docker is active and enabled at boot.
+
+## IMPORTANT
+
+When Porch relies on Node installed via NVM on the VPS, SSH deploy steps must source "$HOME/.nvm/nvm.sh" before calling npx; bash -lc alone may not be enough.
 
 ## Validation Checklist
 

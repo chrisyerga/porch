@@ -44,12 +44,14 @@ export async function initHost(
     `write ${paths.hostConfigPath}`,
     `write ${paths.caddyfilePath}`,
     `write ${paths.edgeComposePath}`,
+    "ensure Docker service is enabled and started",
     `ensure Docker network ${config.network}`,
     "start porch edge stack",
   ];
 
   if (!input.dryRun) {
     await assertHostPrerequisites();
+    await ensureDockerService();
     await mkdir(paths.servicesDir, { recursive: true });
     await mkdir(paths.runtimeDir, { recursive: true });
     await writeHostConfig(paths, config);
@@ -74,14 +76,23 @@ export async function doctorHost(paths: PorchPaths): Promise<CommandResult> {
   const checks = {
     docker: await commandExists("docker"),
     dockerCompose: false,
+    systemctl: await commandExists("systemctl"),
+    dockerServiceActive: undefined as boolean | undefined,
+    dockerServiceEnabled: undefined as boolean | undefined,
     node: await commandExists("node"),
   };
   if (checks.docker) {
     checks.dockerCompose = await dockerComposeAvailable();
   }
+  if (checks.systemctl) {
+    checks.dockerServiceActive = await systemctlCheck("is-active", "docker");
+    checks.dockerServiceEnabled = await systemctlCheck("is-enabled", "docker");
+  }
 
   if (!checks.docker) warnings.push("docker is not installed or not on PATH");
   if (checks.docker && !checks.dockerCompose) warnings.push("docker compose is not available");
+  if (checks.systemctl && checks.dockerServiceActive === false) warnings.push("docker service is not active");
+  if (checks.systemctl && checks.dockerServiceEnabled === false) warnings.push("docker service is not enabled at boot");
   if (!checks.node) warnings.push("node is not installed or not on PATH");
 
   let host: HostConfig | undefined;
@@ -254,6 +265,35 @@ async function assertHostPrerequisites(): Promise<void> {
   }
   if (!(await dockerComposeAvailable())) {
     throw new Error("docker compose is required before running porch host init");
+  }
+}
+
+async function ensureDockerService(): Promise<void> {
+  if (!(await commandExists("systemctl"))) return;
+  await runSystemctl(["enable", "docker"]);
+  await runSystemctl(["start", "docker"]);
+}
+
+async function systemctlCheck(action: "is-active" | "is-enabled", service: string): Promise<boolean> {
+  try {
+    await run("systemctl", [action, "--quiet", service]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function runSystemctl(args: string[]): Promise<void> {
+  const command = process.getuid?.() === 0 ? "systemctl" : "sudo";
+  const fullArgs = command === "systemctl" ? args : ["-n", "systemctl", ...args];
+  try {
+    await run(command, fullArgs);
+  } catch (error) {
+    const action = args.join(" ");
+    throw new Error(
+      `Failed to run systemctl ${action}. Re-run as root or configure passwordless sudo for Docker service management.`,
+      { cause: error },
+    );
   }
 }
 

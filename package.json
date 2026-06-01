@@ -1,8 +1,10 @@
 {
   "name": "@lindale/porch",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Manage shared VPS edge deployments with Docker, Caddy, and provider-backed DNS.",
   "type": "module",
+  "icon": "server",
+  "color": "purple",
   "bin": {
     "porch": "./dist/cli.js"
   },

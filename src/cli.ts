@@ -24,7 +24,7 @@ host
   .option("--default-domain <domain>", "Default domain for generated service hostnames")
   .option("--host-ip <ip>", "Public IP address for DNS records")
   .option("--network <name>", "Docker network name", "porch")
-  .addOption(new Option("--provider <provider>", "DNS provider").choices(["digitalocean"]))
+  .addOption(new Option("--provider <provider>", "DNS provider").choices(["digitalocean"]).default("digitalocean"))
   .option("--token-env <name>", "Environment variable containing provider token", "DIGITALOCEAN_TOKEN")
   .option("--dry-run", "Show planned changes without applying them")
   .option("--json", "Emit structured JSON output")

@@ -26,6 +26,26 @@ Porch stores host config in `/etc/porch`, generated edge files in `/opt/porch`, 
 
 Use `--dry-run` to inspect planned changes and `--json` for agent-friendly output.
 
+## Reboot Persistence
+
+Porch relies on Docker's normal boot behavior instead of installing a separate startup script. `host init` enables and starts the Docker systemd service when `systemctl` is available, then starts the Porch edge stack.
+
+Generated edge and app compose files use:
+
+```yaml
+restart: unless-stopped
+```
+
+After a VPS reboot, Docker restarts the existing Caddy edge container and app containers automatically as long as the containers existed before reboot and were not manually stopped. The shared `porch` Docker network persists across reboot, and Caddy certificate/config state is stored in Docker volumes.
+
+Check reboot readiness with:
+
+```bash
+npx @lindale/porch host doctor --json
+```
+
+`host doctor` reports whether Docker is installed, whether Docker Compose is available, and whether the Docker service is active and enabled at boot on systemd hosts.
+
 ## Register A Service
 
 From the VPS, or from CI over SSH:
