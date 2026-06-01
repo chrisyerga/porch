@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command, Option } from "commander";
+import { readFileSync } from "node:fs";
 import { initHost, doctorHost, registerService, renderHost, serviceStatus, unregisterService } from "./host.js";
 import { printResult, outputMode } from "./output.js";
 import { resolvePorchPaths } from "./paths.js";
@@ -10,7 +11,7 @@ const program = new Command();
 program
   .name("porch")
   .description("Manage shared VPS edge deployments with Docker, Caddy, and provider-backed DNS.")
-  .version("0.1.0")
+  .version(packageVersion())
   .option("--config-dir <path>", "Porch config directory", process.env.PORCH_CONFIG_DIR)
   .option("--runtime-dir <path>", "Porch runtime directory", process.env.PORCH_RUNTIME_DIR);
 
@@ -220,4 +221,11 @@ function parseEnv(values: string[] | undefined): Record<string, string> {
     env[value.slice(0, index)] = value.slice(index + 1);
   }
   return env;
+}
+
+function packageVersion(): string {
+  const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+    version?: string;
+  };
+  return packageJson.version ?? "0.0.0";
 }
