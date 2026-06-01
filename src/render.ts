@@ -45,8 +45,7 @@ export function renderEdgeCompose(host: HostConfig): string {
     },
     networks: {
       [host.network]: {
-        name: host.network,
-        driver: "bridge",
+        external: true,
       },
     },
     volumes: {
