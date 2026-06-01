@@ -1,0 +1,57 @@
+name: Porch Deploy
+description: Deploy a Docker image to a Porch-managed VPS over SSH.
+inputs:
+  host:
+    description: SSH host for the Porch VPS.
+    required: true
+  user:
+    description: SSH user for the Porch VPS.
+    required: true
+  ssh-key:
+    description: Private SSH key with access to the Porch VPS.
+    required: true
+  service-id:
+    description: Stable Porch service id.
+    required: true
+  domain:
+    description: Primary domain for the service.
+    required: true
+  container:
+    description: Docker container name on the Porch network.
+    required: true
+  port:
+    description: Internal container port.
+    required: true
+  image:
+    description: Docker image reference to deploy.
+    required: true
+  deploy-path:
+    description: Directory on the VPS for the service compose file.
+    required: true
+  extra-args:
+    description: Additional arguments passed to porch service register.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Register service with Porch
+      shell: bash
+      run: |
+        set -euo pipefail
+        key_file="$(mktemp)"
+        chmod 600 "$key_file"
+        printf '%s\n' '${{ inputs.ssh-key }}' > "$key_file"
+        ssh -i "$key_file" \
+          -o StrictHostKeyChecking=accept-new \
+          "${{ inputs.user }}@${{ inputs.host }}" \
+          "npx @lindale/porch service register \
+            --service-id '${{ inputs.service-id }}' \
+            --domain '${{ inputs.domain }}' \
+            --container '${{ inputs.container }}' \
+            --port '${{ inputs.port }}' \
+            --image '${{ inputs.image }}' \
+            --deploy-path '${{ inputs.deploy-path }}' \
+            ${{ inputs.extra-args }} \
+            --json"
+        rm -f "$key_file"

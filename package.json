@@ -1,0 +1,34 @@
+{
+  "name": "@lindale/porch",
+  "version": "0.1.0",
+  "description": "Manage shared VPS edge deployments with Docker, Caddy, and provider-backed DNS.",
+  "type": "module",
+  "bin": {
+    "porch": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "yaml": "^2.8.2",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "npm@11.6.2"
+}

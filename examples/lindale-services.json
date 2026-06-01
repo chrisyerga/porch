@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "services": [
+    {
+      "id": "lindale",
+      "name": "Lindale Website",
+      "domains": ["lindale.tech"],
+      "wwwRedirect": true,
+      "upstream": {
+        "container": "lindale-web",
+        "port": 80
+      },
+      "image": "ghcr.io/chrisyerga/lindale-website:latest",
+      "deploy": {
+        "path": "/opt/lindale",
+        "repository": "chrisyerga/lindale-website"
+      }
+    },
+    {
+      "id": "cafezoe",
+      "name": "Cafe Zoe",
+      "domains": ["cafezoe.lol"],
+      "wwwRedirect": true,
+      "upstream": {
+        "container": "cafezoe-web",
+        "port": 3000
+      },
+      "image": "ghcr.io/chrisyerga/lbbb:latest",
+      "env": {
+        "SITE_URL": "https://cafezoe.lol"
+      },
+      "deploy": {
+        "path": "/opt/cafezoe",
+        "repository": "chrisyerga/lbbb"
+      }
+    },
+    {
+      "id": "kenzies",
+      "name": "Kenzie's Kandles",
+      "domains": ["kenzieskandles.com"],
+      "wwwRedirect": true,
+      "upstream": {
+        "container": "kenzies-web",
+        "port": 4321
+      },
+      "image": "ghcr.io/chrisyerga/kenzies-kandles:latest",
+      "deploy": {
+        "path": "/opt/kenzieskandles",
+        "repository": "chrisyerga/kenzies-kandles",
+        "migrationCommand": "node scripts/migrate.js"
+      }
+    }
+  ]
+}
