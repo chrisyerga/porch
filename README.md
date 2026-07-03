@@ -48,6 +48,8 @@ npx @lindale/porch host doctor --json
 
 ## Register A Service
 
+This runs on your cloud hosting. Right now only Digital Ocean is supported, because that's who I use. Feel free to add support for others. This runs on your VPS and registers a new service to be hosted on it. It presumes that you've already run ```npx @lindale/porch host init``` which will set up the base infra on your host.
+
 From the VPS, or from CI over SSH:
 
 ```bash
@@ -64,6 +66,8 @@ npx @lindale/porch service register \
 If DigitalOcean is configured, Porch upserts DNS records. If `--image` and `--deploy-path` are provided, Porch writes the app compose file, pulls the image, starts the app container on the `porch` network, renders Caddy, reloads Caddy, and reports the result.
 
 ## Scaffold An App Repo
+
+This runs on your local dev machine in your repo. This sets up your repo to be published via porch when you commit to github or merge a pr to main. It adds the Dockerfile and github actions as well as a PORCH.md file for your agent. If anything is busted the agent will fix it.
 
 ```bash
 npx @lindale/porch scaffold app \
